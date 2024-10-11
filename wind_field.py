@@ -10,10 +10,10 @@ def generate_wind_field():
     Outputs X and Y components of the 2D vector field corresponding to the wind
     '''
 
-    np.random.seed(42)
+    np.random.seed()
 
-    angles = (2 * np.pi) * generate_perlin_noise_2d((256, 256), (8,8))
-    mags = 60 ** generate_perlin_noise_2d((256, 256), (8,8))
+    angles = (2 * np.pi) * generate_perlin_noise_2d((1000, 1000), (8,8))
+    mags = 100 * (0.1 + generate_perlin_noise_2d((1000, 1000), (8,8)))
 
     X = mags * np.cos(angles)
     Y = mags * np.sin(angles)
