@@ -4,7 +4,7 @@ from perlin_numpy import (
     generate_perlin_noise_2d
 )
 
-def generate_wind_field(shape = (1000, 1000)):
+def generate_wind_field(shape = (1000,1000)):
 
     '''
     Outputs X and Y components of the random 2D vector field corresponding to the wind
@@ -23,7 +23,7 @@ def generate_wind_field(shape = (1000, 1000)):
 def generate_wind_field_uniform(angle, shape = (1000, 1000)):
 
     '''
-    Outputs X and Y components of the random 2D vector field corresponding to the wind
+    Outputs X and Y components of the uniform 2D vector field corresponding to the wind
     '''
 
     np.random.seed()
