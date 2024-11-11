@@ -1,0 +1,137 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def tem(h):
+    if h > 25000:
+        T = -131.21 + 0.00299 * h
+    elif 11000 < h <= 25000:
+        T = -56.46
+    else:  # h <= 11000
+        T = 15.04 - 0.00649 * h
+    return T
+
+
+def air_density(h, P0=1013.25, L=0.0065, T0=288.15, g=9.81, M=0.029, R=8.314):
+    """
+    计算给定高度h处的空气密度
+
+    参数:
+    h : float : 高度（米）
+    P0 : float : 海平面标准压力（hPa），默认1013.25
+    L : float : 温度梯度（K/m），默认0.0065
+    T0 : float : 海平面标准温度（K），默认288.15
+    g : float : 重力加速度（m/s²），默认9.81
+    M : float : 空气的平均摩尔质量（kg/mol），默认0.029
+    R : float : 气体常数（J/(mol·K)），默认8.314
+
+    返回:
+    float : 在高度h处的空气密度（kg/m³）
+    """
+    # 计算高度h处的压力
+    P = P0 * (1 - (L * h) / T0) ** (g * M / (R * L))
+
+    # 计算高度h处的密度
+    density = (P * 100) * M / (R * (tem(h) + 273.15))  # P需要转换为Pa
+    return density
+
+def rho(h, P0=1013.25, L=0.0065, T0=288.15, g=9.81, M=0.029, R=8.314):
+    """
+    计算给定高度h处的空气密度
+
+    参数:
+    h : float : 高度（米）
+    P0 : float : 海平面标准压力（hPa），默认1013.25
+    L : float : 温度梯度（K/m），默认0.0065
+    T0 : float : 海平面标准温度（K），默认288.15
+    g : float : 重力加速度（m/s²），默认9.81
+    M : float : 空气的平均摩尔质量（kg/mol），默认0.029
+    R : float : 气体常数（J/(mol·K)），默认8.314
+
+    返回:
+    float : 在高度h处的空气密度（kg/m³）
+    """
+
+    # 计算高度h处的压力
+    P = P0 * (1 - (L * h) / T0) ** (g * M / (R * L))
+
+
+    # 计算高度h处的密度
+    density = (P * 100) * 0.004 / (R * (tem(h)+273.15))  # P需要转换为Pa
+
+    return density
+def lift(vH, h, V=1570796.33, g=9.81):
+    L = vH * air_density(h) * g - vH * rho(h) * g 
+    M = L / g
+    return M
+
+
+
+
+# 创建高度值数组
+h_values = np.linspace(0, 30000, 500)
+
+# 计算对应的空气密度值
+r_values = [air_density(h) for h in h_values]
+
+# 绘图空气密度
+plt.figure(figsize=(10, 6))
+plt.plot(h_values, r_values, label='Air Density vs Altitude', color='orange')
+plt.title('Air Density vs Altitude')
+plt.xlabel('Altitude (m)')
+plt.ylabel('Density (kg/m³)')
+plt.grid()
+plt.legend()
+plt.show()
+
+# 计算升力与高度
+height = np.linspace(10000, 30000, 500)
+mass_values = [lift(6.69e6, h) for h in height]
+
+# 绘制升力图
+plt.figure(figsize=(10, 6))
+plt.plot(height, mass_values, label='mass of cargo vs Altitude', color='blue')
+plt.title('mass of cargo vs Altitude')
+plt.xlabel('Altitude (m)')
+plt.ylabel('Mass (kg)')
+plt.grid()
+plt.legend()
+plt.show()
+
+def density(h):
+ ratio_density = air_density(h)/air_density(0)
+ ratio_tem = (tem(h)+273)/(tem(0)+273)
+
+ density = ratio_density*0.09 /ratio_tem
+ return density
+
+def lift2(vH, h, V=1570796.33, g=9.81):
+    L = vH * density(h) * g - vH * rho(h) * g
+    M = L / g
+    return M
+
+
+d = [density(h) for h in h_values]
+
+plt.figure(figsize=(10, 6))
+plt.plot(h_values, d, label='Air Density vs Altitude', color='orange')
+plt.title('Air Density vs Altitude')
+plt.xlabel('Altitude (m)')
+plt.ylabel('Density (kg/m³)')
+plt.grid()
+plt.legend()
+plt.show()
+
+
+
+mass_values2 = [lift2(6.69e6, h) for h in height]
+
+# 绘制升力图
+plt.figure(figsize=(10, 6))
+plt.plot(height, mass_values2, label='mass of cargo vs Altitude', color='blue')
+plt.title('mass of cargo vs Altitude')
+plt.xlabel('Altitude (m)')
+plt.ylabel('Mass (kg)')
+plt.grid()
+plt.legend()
+plt.show()
