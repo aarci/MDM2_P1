@@ -4,21 +4,21 @@ from wind_field import generate_wind_field, plot_wind_field, generate_wind_field
 import matplotlib.animation as animation
 
 
-T_MAX = 30000
-C_d = 0.3
+T_MAX = 600000
+C_d = 0.2
 
-rho = 0.5
+rho = 0.8
 dt = 1
 
 #define ellipsoid shape
 a = 100
-b = 65
+b = 100
 A_yz = np.pi * (b ** 2)
-A_zx = 3 * np.pi * a * b
+A_zx = 1.5 * np.pi * a * b
 
 A = 2
 
-m = 613000
+m = 893187
 v0 = np.array([5,5])
 vmax = 30
 r0 = np.array([200, 200])
@@ -122,15 +122,15 @@ def find_wind_v_constant(X, Y, ship, phi):
         i2, j2 = int(np.round(coords2[0])), int(np.round(coords2[1]))
         try:
             v = np.array([X[i2%1000, j2%1000], Y[i2%1000, j2%1000]])
-            return v
+            return v, coords2
             
             
         except IndexError:
             
-            return np.array([])
+            return None
     else:
         
-        return np.array([])
+        return None
     
     
             
@@ -198,8 +198,13 @@ def simulation_main(ship, X, Y, phi):
     while np.linalg.norm(goal - ship.coords) > 100:
 
     #for i in range(1000):        
-        wind_v = find_wind_v_constant(X, Y, ship, 0)
-        wind_v_pred = find_wind_v_constant(X, Y, ship, phi)
+        j = find_wind_v_constant(X, Y, ship, 0)
+        if j is not None:
+            wind_v, x = j
+            wind_v_pred, pos2 = find_wind_v_constant(X, Y, ship, phi) 
+        else:
+            wind_v = np.array([])
+        
         if wind_v.any(): 
             
             
@@ -220,7 +225,7 @@ def simulation_main(ship, X, Y, phi):
             #     T = np.sign(target_traj - dir_v) * normalize(perpendicular(ship.speed)) * (T_MAX/100)
             #     plt.scatter(*ship.coords, color = "r")
             
-            traj = normalize(goal - ship.coords)
+            traj = normalize(goal - pos2)
             n = perpendicular(traj)
             
 
@@ -307,7 +312,7 @@ def evaluate_sim(phi, iter = 5):
         ax, X, Y, pos, goal_reached = simulation(phi, fig = False)
         
         pos = pos.T
-        
+        print()
         dist = 0
         pos_prev = pos[0]
         for position in pos[1:]:
@@ -468,38 +473,40 @@ def remove_outliers(array, alpha = 2):
 n_phi = 900
 def main():
     #validate_geometry()
-    # plot_args = simulation(100, fig = True)
+    # plot_args = simulation(0, fig = True)
     # simulation_plot(*plot_args[:-1])
-
+    # plt.show()
     #reactive = evaluate_sim(1)
     #proactive = evaluate_sim("reactive")
 
-    phis = np.linspace(-150, 175,3)
-    d_opt = np.linalg.norm(goal - r0) - 10
+    phis = np.linspace(-30, 30, 60)
+    d_opt = np.linalg.norm(goal - r0) - 100
+    print(d_opt)
     k = len(phis)
     
     dists = np.zeros(k)
     #times = np.zeros(k)
     for i in range(k):
-        dist_list, time_list = evaluate_sim(int(phis[i]), iter = 10)
-        
+        dist_list, time_list = evaluate_sim(int(phis[i]), iter = 15)
+        diff_list = np.subtract(dist_list, d_opt)
         #time = np.mean(remove_outliers(time_list))
-        dist = np.mean(remove_outliers(dist_list))
-        dists[i] = dist - d_opt
+        diff = np.mean(remove_outliers(diff_list))
+        dists[i] = diff
         #times[i] = time
     
-    fig, ax1 = plt.subplots(1, 1, figsize=(30, 10), tight_layout=True)
+    fig, ax1 = plt.subplots(1, 1, figsize=(9, 3), tight_layout=True)
     #figures(dists, times, phis, ax1, ax2)
-    deg = 6
+    deg = 4
     y_model = np.polyfit(phis, dists, deg)
     y_val = np.polyval(y_model, phis)
     ax1.plot(phis, dists, label = f'Data')
     ax1.plot(phis, y_val, label = f'Fitted polynomial of degree {deg}')
+    ax1.set_ylim(bottom = 0)
     ax1.legend()
     ax1.set_ylabel(r'$d-d_s$ (m)')
     ax1.set_xlabel(r'$\phi$')
-    ax1.set_title(r'$d$ against $\phi$')
-    plt.savefig('phi.svg')
+    ax1.set_title(r'$d-d_s$ against $\phi$')
+    plt.savefig('phi2.svg')
     #plt.scatter(proactive[0], proactive[1], c = "g")
     
 
