@@ -37,17 +37,18 @@ def generate_wind_field_uniform(angle, shape = (1000, 1000)):
     return X, Y
 
 def plot_wind_field(X, Y):
-    
-    plt.quiver(X, Y, units = 'xy', minlength = 0)
+    fig, ax = plt.subplots(1,1)
+    ax.quiver(X, Y, units = 'xy', minlength = 0)
+    ax.set_axis_off()
     #plt.imshow(mags, cmap='gray', interpolation='lanczos')
     #plt.colorbar()
-    #plt.savefig("wind.svg")
+    plt.savefig("wind.svg")
     plt.show()
 
 def main():
 
-    X, Y = generate_wind_field()
+    X, Y = generate_wind_field((64,64))
     plot_wind_field(X, Y)
-
+    
 if __name__ == "__main__":
     main()
